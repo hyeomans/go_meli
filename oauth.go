@@ -19,14 +19,17 @@ func newOAuthEndpoints(c Config) *oauthEndpoints {
 	}
 }
 
-func (e *oauthEndpoints) Token(ctx context.Context) (*OauthTokenResponse, error) {
+// Token ...
+func (e *oauthEndpoints) Token(ctx context.Context, serverGeneratedAuthCode string) (*OauthTokenResponse, error) {
 	baseURL := fmt.Sprintf("%s/oauth/token", e.c.BaseURL)
 	data := url.Values{}
+
 	data.Add("grant_type", "authorization_code")
 	data.Add("client_id", e.c.ClientID)
 	data.Add("client_secret", e.c.Secret)
-	data.Add("code", e.c.UserCode)
 	data.Add("redirect_uri", e.c.CallbackURL)
+
+	data.Add("code", serverGeneratedAuthCode)
 	values := strings.NewReader(data.Encode())
 
 	req, err := http.NewRequest(http.MethodPost, baseURL, values)

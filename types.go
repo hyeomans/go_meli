@@ -5,16 +5,6 @@ import (
 	"time"
 )
 
-// Config ...
-type Config struct {
-	HTTP        Doer
-	ClientID    string
-	UserCode    string
-	Secret      string
-	CallbackURL string
-	BaseURL     string
-}
-
 // Doer defines the method required for an HTTP client to execute requests.
 // An *http.Client satisfies this interface.
 type Doer interface {

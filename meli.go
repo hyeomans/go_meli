@@ -1,20 +1,32 @@
 package meli
 
+import (
+	"fmt"
+	"net/url"
+)
+
 type Client struct {
 	OAuth      *oauthEndpoints
 	Sites      *sitesEndpoints
 	Categories *categoriesEndpoints
+	Orders     *ordersEndpoint
+}
+
+// Config ...
+type Config struct {
+	HTTP        Doer
+	ClientID    string
+	Secret      string
+	CallbackURL string
+	BaseURL     string
 }
 
 func New(c Config) (*Client, error) {
-	//If userCode is not provided, then a generic client is returned.
-	//This client can be used only to access public API
-	// if strings.Compare(userCode, "") == 0 {
-	// 	return nil
-	// }
-	// if c.UserCode == "" {
-	// 	return nil, errors.New("USER_CODE_IS_MISSING")
-	// }
+	_, err := url.ParseRequestURI(c.CallbackURL)
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid callback_url: %s", err)
+	}
 
 	if c.BaseURL == "" {
 		c.BaseURL = "https://api.mercadolibre.com"
@@ -24,6 +36,7 @@ func New(c Config) (*Client, error) {
 		OAuth:      newOAuthEndpoints(c),
 		Sites:      newSitesEndpoints(c),
 		Categories: newCategoriesEndpoints(c),
+		Orders:     newOrdersEndpoint(c),
 	}
 
 	return client, nil

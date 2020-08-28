@@ -10,7 +10,7 @@ import (
 func Test(t *testing.T) {
 	ctx := context.Background()
 	mockServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		t.Logf("Sending fake request to %v", req.URL)
+		t.Logf("Sending fake request to %v", req.RequestURI)
 		rw.WriteHeader(200)
 		rw.Write([]byte(`
 		{
@@ -30,11 +30,10 @@ func Test(t *testing.T) {
 		CallbackURL: "https://localhost:3000/callback/mercadolibre?something=token",
 		ClientID:    "clientID",
 		Secret:      "clientSecret",
-		UserCode:    "12319123",
 	}
 	client, _ := New(c)
 
-	r, err := client.OAuth.Token(ctx)
+	r, err := client.OAuth.Token(ctx, "token")
 
 	if err != nil {
 		t.Errorf("OAuth.Token returned an error: %v", err)
@@ -43,9 +42,4 @@ func Test(t *testing.T) {
 	if r.AccessToken != "reallylongaccesstoken" {
 		t.Errorf("Expecting %v but got %v", "reallylongaccesstoken", r.AccessToken)
 	}
-
-	// client, _ := New(Config{
-	// 	HTTP: ,
-	// })
-
 }

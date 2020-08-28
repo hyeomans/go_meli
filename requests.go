@@ -5,7 +5,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
+
+func requestWithToken(ctx context.Context, accessToken string, req *http.Request, doer Doer) ([]byte, error) {
+	q, err := url.ParseQuery(req.URL.RawQuery)
+	if err != nil {
+		return nil, ClientError{
+			isTemporary: false,
+			message:     fmt.Sprintf("could not parse query to add accesstoken: %s", err),
+			statusCode:  500,
+		}
+	}
+
+	q.Add("access_token", accessToken)
+
+	req.URL.RawQuery = q.Encode()
+
+	return request(ctx, req, doer)
+}
 
 func request(ctx context.Context, req *http.Request, doer Doer) ([]byte, error) {
 	req.Header.Add("Content-Type", "application/json")
@@ -38,6 +56,8 @@ func request(ctx context.Context, req *http.Request, doer Doer) ([]byte, error) 
 			http.StatusServiceUnavailable == res.StatusCode {
 			isTemporary = true
 		}
+
+		//TODO: Try to parse error message
 
 		return nil, ClientError{
 			isTemporary: isTemporary,
